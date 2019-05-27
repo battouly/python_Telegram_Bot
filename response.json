@@ -1,0 +1,39 @@
+{
+    "status": {
+        "timestamp": "2019-05-13T09:20:37.593Z",
+        "error_code": 0,
+        "error_message": null,
+        "elapsed": 5,
+        "credit_count": 1
+    },
+    "data": {
+        "ETC": {
+            "id": 1321,
+            "name": "Ethereum Classic",
+            "symbol": "ETC",
+            "slug": "ethereum-classic",
+            "circulating_supply": 110419058,
+            "total_supply": 110419058,
+            "max_supply": 210000000,
+            "date_added": "2016-07-24T00:00:00.000Z",
+            "num_market_pairs": 196,
+            "tags": [
+                "mineable"
+            ],
+            "platform": null,
+            "cmc_rank": 18,
+            "last_updated": "2019-05-13T09:20:03.000Z",
+            "quote": {
+                "USD": {
+                    "price": 5.94901302396,
+                    "volume_24h": 661665488.080418,
+                    "percent_change_1h": 0.929973,
+                    "percent_change_24h": -2.14635,
+                    "percent_change_7d": 6.45276,
+                    "market_cap": 656884414.1353947,
+                    "last_updated": "2019-05-13T09:20:03.000Z"
+                }
+            }
+        }
+    }
+}
