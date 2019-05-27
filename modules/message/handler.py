@@ -5,15 +5,15 @@ from modules.message.utils import Utils
 peopleList = [
     {
         "name": "Nasrin",
-        "tid": 499850947
+        "tid": 4998*****
     },
     {
         "name": "Fatima",
-        "tid": 462737129
+        "tid": 4627*****
     },
     {
         "name": "KbotMasteresses",
-        "tid": -1001484208668
+        "tid": -100148*******
     }    
 ]
 def handle_callbacks(callback):
