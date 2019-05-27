@@ -5,7 +5,7 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-HOST = 'https://20e76833.ngrok.io'
+HOST = 'https://4cac1cd0.ngrok.io'
 
 TOKEN = '603627825:AAGMCcwk2vLI5VyOLvsBJ46vPUOSvKxD2ng'
 bot = telegram.Bot(token=TOKEN)
@@ -15,6 +15,7 @@ botName = 'Fatoumata'
 import pymongo
 from pymongo import MongoClient
 mongo = MongoClient('mongodb://Fahtima:Bot123@ds157256.mlab.com:57256/teleg_bot')
+db = mongo['teleg_bot']
 ''' End of mLAB setting '''
 
 def create_profile():

@@ -1,12 +1,11 @@
 from modules import db
-#from helpers import async
 
 import copy
 
-messages = db.messages
+task = db.tasks
 
 
-class MessageModel:
+class TaskModel:
     def __init__(self, data):
         data = data or {}
         for k, v in data.items():
@@ -17,48 +16,48 @@ class MessageModel:
 
     def save(self):
         try:
-            res = messages.insert_one(copy.deepcopy(self.__dict__))
+            res = task.insert_one(copy.deepcopy(self.__dict__))
             return res.acknowledged
         except Exception as exc:
-            print("[Message Model Error] Insert New Message:", exc.args) 
+            print("[Task Model Error] Insert New Message:", exc.args) 
         return False
 
     @staticmethod
     def save_one(data):
         try:
-            res = messages.insert_one(data)
+            res = task.insert_one(data)
             return res.acknowledged
         except Exception as exc:
-            print ("[Message Model Error] Insert New Message:", exc.args)
+            print ("[Task Model Error] Insert New Message:", exc.args)
         return False
 
     @staticmethod
     def get_one(args, filters):
         try:
-            message = messages.find_one(args, filters)
+            message = task.find_one(args, filters)
             if message:
                 return message
             return {}
         except Exception as e:
-            print ('[Message Model Error] Find message: ' + str(e))
+            print ('[Task Model Error] Find message: ' + str(e))
         return {}
 
     @staticmethod
     def get_all(args, filters):
         try:
-            ids = messages.find(args, filters)
+            ids = task.find(args, filters)
             if ids:
                 return list(ids)
             return []
         except Exception as e:
-            print ('[Message Model Error] Get message ids: ' + str(e))
+            print ('[Task Model Error] Get message ids: ' + str(e))
         return []
 
     @staticmethod
     def delete_one(args):
         try:
-            messages.remove(args)
+            task.remove(args)
             return True
         except Exception as e:
-            print ('[Message Model Error] Delete message: ' + str(e))
+            print ('[Task Model Error] Delete message: ' + str(e))
         return False

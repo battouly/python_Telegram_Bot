@@ -1,20 +1,27 @@
 import telegram
 #import josn
 import logging
-
+import time
+import os
 from flask import request, Blueprint
 
 from modules import (bot)
 from modules.message.utils import Utils
 from modules.message.handler import handle_callbacks
 from modules.Consts.main import Const
+from models.message import MessageModel
+from modules.task.main import Task
 #from telegram import ReplyKeyboardMarkup
 
 main = Blueprint('main', __name__)
 
+def generate_id():
+    return os.urandom(5).hex()
+
 @main.route('/', methods=['POST'])
 def webhook_handler():
     #print('im hereeee')
+    timestamp = int(time.time())
     try:
         if request.method == "POST":
             # retrieve the message in JSON and transform it to Telegram object
@@ -24,6 +31,7 @@ def webhook_handler():
                     chat_id = update.message.chat.id 
                     #commands for displaying inlinekeyboard
                     print (chat_id)
+                    _id = generate_id()
                     if update.message.entities:
                         for entity in update.message.entities:
                             if entity.type == 'bot_command':
@@ -33,7 +41,27 @@ def webhook_handler():
                                 txt = update.message.text[c_offset+ c_length:]
                                 if cmnd == 'task':
                                     _key = Utils.create_inlinekeyboard(buttons=Const.mainInKeyBoard, cols=2)
-                                    bot.sendMessage(chat_id=chat_id, text=txt or ' Do nothing ' ,parse_mode='Markdown', reply_markup=_key)   
+                                    res = bot.sendMessage(chat_id=chat_id, text=txt or ' Do nothing ' ,parse_mode='Markdown', reply_markup=_key)
+                                    Task.save_task({
+                                        'timestamp': timestamp,
+                                        'task': txt,
+                                        'issuer_id': chat_id,
+                                        'issue': update.message.from_user.full_name,
+                                        'level': '',
+                                        'status': 'initiate',
+                                        'message_id': res.message_id,
+                                        'id':_id
+                                    })
+                                    MessageModel.save_one({
+                                        'message_id': res.message_id,
+                                        'text': txt,
+                                        'task': txt,
+                                        'chatid':chat_id,
+                                        'keyboard':Const.mainInKeyBoard,
+                                        'photo':'',
+                                        'id':_id
+                                    })
+
                                 else:
                                     bot.sendMessage(chat_id=chat_id, text='blah blah')               
                     elif update.message.caption_entities:
@@ -49,7 +77,24 @@ def webhook_handler():
                                     _key = Utils.create_inlinekeyboard(buttons=Const.mainInKeyBoard, cols=2)
                                     res = bot.send_photo(chat_id=chat_id, caption=txt or ' Do nothing ' ,
                                     photo=photo, parse_mode='Markdown', reply_markup=_key) 
-                                    print(res.message_id)  
+                                    Task.save_task({
+                                        'timestamp': timestamp,
+                                        'task': txt,
+                                        'issuer_id': chat_id,
+                                        'issue': update.message.from_user.full_name,
+                                        'level': '',
+                                        'message_id': res.message_id,
+                                        'id':_id
+                                    })
+                                    MessageModel.save_one({
+                                        'message_id': res.message_id,
+                                        'text': txt,
+                                        'task':txt,
+                                        'chatid':chat_id,
+                                        'keyboard':Const.mainInKeyBoard,
+                                        'photo': photo,
+                                        'id':_id
+                                    })
                                 else:
                                     bot.sendMessage(chat_id=chat_id, text='blah blah')                                  
                     elif update.message.photo:
