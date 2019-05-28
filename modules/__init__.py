@@ -5,7 +5,7 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-HOST = 'https://4cac1cd0.ngrok.io'
+HOST = 'https://bd520c3d.ngrok.io'
 
 TOKEN = '603627825:AAGMCcwk2vLI5VyOLvsBJ46vPUOSvKxD2ng'
 bot = telegram.Bot(token=TOKEN)
@@ -19,7 +19,6 @@ db = mongo['teleg_bot']
 ''' End of mLAB setting '''
 
 def create_profile():
-    
     profile  = {
         "Name": "Leila",
         "Phone": ["982833049043",  "09293048u52843", "qw548293854"],
@@ -32,20 +31,6 @@ def create_profile():
      }
     pro.insert_one(profile)
     print ("done !!!" )
-
-''' inline_keyboard json object'''
-s = json.dumps(
-    {'inline_keyboard':
-        [
-            [
-                {'text': 'Office Admin', 'callback_data': 'Office Admin'},
-                {'text': 'K Room', 'callback_data': 'K_Room'},
-                {'text': 'Sales', 'callback_data': 'Sales'},
-                {'text': 'k Play', 'callback_data': 'k_Play'}
-            ]
-        ]
-    }
-)
 
 from modules.telegramBot.main import main
 
