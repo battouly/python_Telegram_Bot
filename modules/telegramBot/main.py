@@ -2,6 +2,7 @@ import telegram
 #import josn
 import logging
 import time
+import datetime
 import os
 from flask import request, Blueprint
 
@@ -22,6 +23,7 @@ def generate_id():
 def webhook_handler():
     #print('im hereeee')
     timestamp = int(time.time())
+    _date = datetime.datetime.now().strftime('%d %B')
     try:
         if request.method == "POST":
             # retrieve the message in JSON and transform it to Telegram object
@@ -38,24 +40,27 @@ def webhook_handler():
                                 c_offset = entity.__dict__.get('offset')
                                 c_length = entity.__dict__.get('length')
                                 cmnd = update.message.text[c_offset+1: c_offset+ c_length]
-                                txt = update.message.text[c_offset+ c_length:]
+                                task_txt = update.message.text[c_offset+ c_length:]
+                                txt = 'Issuer: {}({})\nTitle: {}'.format(update.message.from_user.full_name, _date, task_txt)
                                 if cmnd == 'task':
                                     _key = Utils.create_inlinekeyboard(buttons=Const.mainInKeyBoard, cols=2)
                                     res = bot.sendMessage(chat_id=chat_id, text=txt or ' Do nothing ' ,parse_mode='Markdown', reply_markup=_key)
                                     Task.save_task({
-                                        'timestamp': timestamp,
-                                        'task': txt,
+                                        'timestamp': int(timestamp),
+                                        'task': task_txt,
                                         'issuer_id': chat_id,
                                         'issue': update.message.from_user.full_name,
                                         'level': '',
                                         'status': 'initiate',
                                         'message_id': res.message_id,
-                                        'id':_id
+                                        'id':_id,
+                                        'department': '',
+                                        'assignee': ''
                                     })
                                     MessageModel.save_one({
                                         'message_id': res.message_id,
                                         'text': txt,
-                                        'task': txt,
+                                        'task': task_txt,
                                         'chatid':chat_id,
                                         'keyboard':Const.mainInKeyBoard,
                                         'photo':'',
@@ -68,18 +73,21 @@ def webhook_handler():
                         for entity in update.message.caption_entities:
                             photo = update.message.photo[-1].file_id
                             if entity.type == 'bot_command':
+                                print ('printing update message')
                                 print(update.message.caption)
+                                
                                 c_offset = entity.__dict__.get('offset')
                                 c_length = entity.__dict__.get('length')
                                 cmnd = update.message.caption[c_offset+1: c_offset+ c_length]
-                                txt = update.message.caption[c_offset+ c_length:]
+                                task_txt = update.message.caption[c_offset+ c_length:]
+                                txt = 'Issuer: {}({})\nTitle: {}'.format(update.message.from_user.full_name, _date, task_txt)
                                 if cmnd == 'task':
                                     _key = Utils.create_inlinekeyboard(buttons=Const.mainInKeyBoard, cols=2)
                                     res = bot.send_photo(chat_id=chat_id, caption=txt or ' Do nothing ' ,
                                     photo=photo, parse_mode='Markdown', reply_markup=_key) 
                                     Task.save_task({
-                                        'timestamp': timestamp,
-                                        'task': txt,
+                                        'timestamp': int(timestamp),
+                                        'task': task_txt,
                                         'issuer_id': chat_id,
                                         'issue': update.message.from_user.full_name,
                                         'level': '',
@@ -89,7 +97,7 @@ def webhook_handler():
                                     MessageModel.save_one({
                                         'message_id': res.message_id,
                                         'text': txt,
-                                        'task':txt,
+                                        'task':task_txt,
                                         'chatid':chat_id,
                                         'keyboard':Const.mainInKeyBoard,
                                         'photo': photo,

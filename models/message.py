@@ -44,6 +44,17 @@ class MessageModel:
         return {}
 
     @staticmethod
+    def update_message(args, set_query):
+        try:
+            res = messages.update_one(args, set_query, upsert=False)
+            if res.acknowledged:
+                return True
+            return False
+        except Exception as e:
+            print ('[Message Model Error] Update message: ' + str(e))
+        return False
+
+    @staticmethod
     def get_all(args, filters):
         try:
             ids = messages.find(args, filters)
