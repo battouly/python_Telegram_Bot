@@ -14,8 +14,8 @@ botName = 'Fatoumata'
 ''' mLAB setting '''
 import pymongo
 from pymongo import MongoClient
-mongo = MongoClient('mongodb://Fahtima:Bot123@ds157256.mlab.com:57256/teleg_bot')
-db = mongo['teleg_bot']
+mongo = MongoClient('mongodb://Fahtima:(dbpassword)@ds157256.mlab.com:57256/dbname')
+db = mongo['dbname']
 ''' End of mLAB setting '''
 
 def create_profile():
