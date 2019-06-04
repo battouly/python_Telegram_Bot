@@ -100,7 +100,7 @@ def handle_callbacks(callback):
             _key3 = Utils.create_inlinekeyboard(buttons=_keyTL, cols=2)            
             print ('this is the: ', level)
             if callback.message.photo:
-                res2 = bot.editMessageCaption(chat_id=people_tid, caption=t, photo=callback.message.photo[-1].file_id, parse_mode='Markdown', reply_markup=_key3)
+                res2 = bot.editMessageCaption(chat_id=people_tid,'message_id': message_id, caption=t, photo=callback.message.photo[-1].file_id, parse_mode='Markdown', reply_markup=_key3)
                 MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t}}) 
                 MessageModel.save_one({
                                         'message_id': res2.message_id,
@@ -112,7 +112,7 @@ def handle_callbacks(callback):
                                         'id': msg.get('id')
                                     })
             else:
-                res2 = bot.editMessageText(chat_id=people_tid, text=t, parse_mode='Markdown', reply_markup=_key3) 
+                res2 = bot.editMessageText(chat_id=people_tid, 'message_id': message_id, text=t, parse_mode='Markdown', reply_markup=_key3) 
                 MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t}}) 
                 MessageModel.save_one({
                                         'message_id': res2.message_id,
