@@ -1,11 +1,12 @@
 import telegram
-import json
+import json, os
 import logging
 from flask import Flask, request
 
 app = Flask(__name__)
 
 HOST = 'https://dry-lowlands-71228.herokuapp.com/'
+#HOST = 'https://7912c345.ngrok.io'
 
 TOKEN = '603627825:AAGMCcwk2vLI5VyOLvsBJ46vPUOSvKxD2ng'
 bot = telegram.Bot(token=TOKEN)

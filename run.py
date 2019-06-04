@@ -1,5 +1,6 @@
 from modules import bot, botName, HOST
 from modules import app as application
+import os
 
 
 def setIt():
@@ -16,4 +17,4 @@ def setIt():
 
 if __name__=='__main__': 
     setIt()   
-    application.run(host='0.0.0.0', debug=True, port=8080)
+    application.run(host='0.0.0.0',  port=8080)
