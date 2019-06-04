@@ -5,7 +5,7 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-HOST = 'https://400ba7a9.ngrok.io'
+HOST = 'https://dry-lowlands-71228.herokuapp.com/'
 
 TOKEN = '603627825:AAGMCcwk2vLI5VyOLvsBJ46vPUOSvKxD2ng'
 bot = telegram.Bot(token=TOKEN)
