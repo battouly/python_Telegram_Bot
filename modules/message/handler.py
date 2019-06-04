@@ -98,9 +98,9 @@ def handle_callbacks(callback):
                     'callback_data': level.get('callback_data').format(dep=args[1], tid=people_tid)
                 })    
             _key3 = Utils.create_inlinekeyboard(buttons=_keyTL, cols=2)            
-            print ('this is the: ', level)
+            print ('this is the: ', people_tid)
             if callback.message.photo:
-                res2 = bot.editMessageCaption(chat_id=people_tid,'message_id': message_id, caption=t, photo=callback.message.photo[-1].file_id, parse_mode='Markdown', reply_markup=_key3)
+                res2 = bot.editMessageCaption(chat_id=chat_id, message_id = message_id, caption=t, photo=callback.message.photo[-1].file_id, parse_mode='Markdown', reply_markup=_key3)
                 MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t}}) 
                 MessageModel.save_one({
                                         'message_id': res2.message_id,
@@ -112,7 +112,7 @@ def handle_callbacks(callback):
                                         'id': msg.get('id')
                                     })
             else:
-                res2 = bot.editMessageText(chat_id=people_tid, 'message_id': message_id, text=t, parse_mode='Markdown', reply_markup=_key3) 
+                res2 = bot.editMessageText(chat_id=chat_id, text=t, message_id = message_id,  parse_mode='Markdown', reply_markup=_key3) 
                 MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t}}) 
                 MessageModel.save_one({
                                         'message_id': res2.message_id,
@@ -123,8 +123,8 @@ def handle_callbacks(callback):
                                         'photo': '',
                                         'id': msg.get('id')
                                     })
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
-            print (" I printed levels")
+            #bot.delete_message(chat_id=chat_id, message_id=message_id)
+            print (" I am done with people")
             
         elif selected_callback in ['asap']:
             print ("I'm in levels")
@@ -189,10 +189,13 @@ def handle_callbacks(callback):
             #bot.sendMessage(chat_id=update.message.from_user.full_name, text=t) 
 
         elif selected_callback in ['reject']:
+            #sender_id = callback.from_user.id
             t = '{txt} \n\n Rejected! ❌ \n by {u}'.format(txt=msg_txt, u=sender_name)
             if callback.message.photo:
+                pid = callback.message.photo[-1].file_id
                 try:
-                    res = bot.editMessageCaption(chat_id=chat_id, caption=t, message_id = message_id)
+                    res = bot.editMessageCaption(chat_id=sender_id, caption=t, message_id = message_id)
+                    #bot.send_photo(chat_id=chat_id, caption=t, photo=pid)
                 except Exception as err:
                     print('[Error in edit caption reject msg]: '+ str(err))
             else:
