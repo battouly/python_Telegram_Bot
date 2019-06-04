@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 HOST = 'https://400ba7a9.ngrok.io'
 
-TOKEN = '603627825:AAGMCcwk2vLI5VyOLvsBJ46vPUOSvKxD2ng'
+TOKEN = 'bot token here'
 bot = telegram.Bot(token=TOKEN)
 botName = 'Fatoumata'
 
