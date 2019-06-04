@@ -1,5 +1,5 @@
 from modules import bot, botName, HOST
-from modules import app
+from modules import app as application
 import os
 
 
@@ -14,7 +14,10 @@ def setIt():
         print("Webhook set Nooo")
         return ("{} WebHook Setup Failed!".format(botName))
 
+def run_server():
+    setIt()
+    application.run()
 
 if __name__=='__main__': 
-    setIt()   
-    app.run()
+    print ('Starting the server')
+    run_server()   
