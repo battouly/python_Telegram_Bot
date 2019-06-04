@@ -17,9 +17,8 @@ class Const:
         {'text': u'Reassign', 'callback_data': 'reassign_{dep}_{tid}'}  
         ]
     task_levelInKeyBoard=[
-        {'text': u'Urgent', 'callback_data': 'urgent'},
-        {'text': u'ASAP', 'callback_data': 'asap'},
-        {'text': u'Add More', 'callback_data': 'add more'}  
+        {'text': u'Urgent', 'callback_data': 'urgent_{dep}_{tid}'},
+        {'text': u'ASAP', 'callback_data': 'asap_{dep}_{tid}'}, 
         ]   
 
     menu_keyboard = [['set Task'], ['view tasks']]

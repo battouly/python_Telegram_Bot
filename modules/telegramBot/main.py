@@ -31,8 +31,9 @@ def webhook_handler():
             if bool(update):
                 if update.message:
                     chat_id = update.message.chat.id 
+                    message_id = update.message.message_id
                     #commands for displaying inlinekeyboard
-                    print (chat_id)
+                    print (chat_id,'_hello')
                     _id = generate_id()
                     if update.message.entities:
                         for entity in update.message.entities:
@@ -44,7 +45,9 @@ def webhook_handler():
                                 txt = 'Issuer: {}({})\nTitle: {}'.format(update.message.from_user.full_name, _date, task_txt)
                                 if cmnd == 'task':
                                     _key = Utils.create_inlinekeyboard(buttons=Const.mainInKeyBoard, cols=2)
-                                    res = bot.sendMessage(chat_id=chat_id, text=txt or ' Do nothing ' ,parse_mode='Markdown', reply_markup=_key)
+                                    res = bot.sendMessage(chat_id=chat_id, message_id=message_id,text=txt or ' Do nothing ' , parse_mode='Markdown', reply_markup=_key)
+                                    print("done 1st step")
+                                    
                                     Task.save_task({
                                         'timestamp': int(timestamp),
                                         'task': task_txt,
@@ -55,7 +58,8 @@ def webhook_handler():
                                         'message_id': res.message_id,
                                         'id':_id,
                                         'department': '',
-                                        'assignee': ''
+                                        'assignee': '',
+                                        'photo': False
                                     })
                                     MessageModel.save_one({
                                         'message_id': res.message_id,
@@ -66,9 +70,10 @@ def webhook_handler():
                                         'photo':'',
                                         'id':_id
                                     })
-
+                                    bot.delete_message(chat_id=chat_id, message_id=message_id,text=txt)
                                 else:
-                                    bot.sendMessage(chat_id=chat_id, text='blah blah')               
+                                    bot.sendMessage(chat_id=chat_id, text='blah blah')  
+                                    bot.delete_message(chat_id=chat_id, message_id=message_id,text=txt)             
                     elif update.message.caption_entities:
                         for entity in update.message.caption_entities:
                             photo = update.message.photo[-1].file_id
@@ -83,7 +88,7 @@ def webhook_handler():
                                 txt = 'Issuer: {}({})\nTitle: {}'.format(update.message.from_user.full_name, _date, task_txt)
                                 if cmnd == 'task':
                                     _key = Utils.create_inlinekeyboard(buttons=Const.mainInKeyBoard, cols=2)
-                                    res = bot.send_photo(chat_id=chat_id, caption=txt or ' Do nothing ' ,
+                                    res = bot.send_photo(chat_id=chat_id, message_id=message_id, caption=txt or ' Do nothing ' ,
                                     photo=photo, parse_mode='Markdown', reply_markup=_key) 
                                     Task.save_task({
                                         'timestamp': int(timestamp),
@@ -91,8 +96,12 @@ def webhook_handler():
                                         'issuer_id': chat_id,
                                         'issue': update.message.from_user.full_name,
                                         'level': '',
+                                        'status': 'initiate',
                                         'message_id': res.message_id,
-                                        'id':_id
+                                        'id':_id,
+                                        'department': '',
+                                        'assignee': '',
+                                        'photo':photo
                                     })
                                     MessageModel.save_one({
                                         'message_id': res.message_id,
@@ -103,6 +112,7 @@ def webhook_handler():
                                         'photo': photo,
                                         'id':_id
                                     })
+                                    bot.delete_message(chat_id=chat_id, message_id=message_id,caption=txt, photo=photo)
                                 else:
                                     bot.sendMessage(chat_id=chat_id, text='blah blah')                                  
                     elif update.message.photo:

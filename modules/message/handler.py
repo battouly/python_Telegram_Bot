@@ -33,18 +33,24 @@ def handle_callbacks(callback):
     print(message_id)
     
     selected_btn = callback.data
-    print(selected_btn)
+    selected_btn = str(selected_btn).strip()
+    
     args = str(selected_btn).strip().split('_')
-    print(args)
+    print(args, 'this is args')
     selected_callback = args[0]
-    print(selected_callback)
-    msg = MessageModel.get_one(args={'message_id': message_id, 'chatid': chat_id}, filters={'_id': 0})
+    
+    #print('you selected: ',selected_callback)
+    #msg = MessageModel.get_one(args={'message_id': message_id, 'chatid': chat_id}, filters={'_id': 0})
+    msg = MessageModel.get_one(args={'message_id': message_id}, filters={'_id': 0})
     if msg:
-        print('found msg')
+        print('I found a message')
         _task = TaskModel.get_one(args={'id': msg.get('id'), 'message_id': msg.get('message_id')}, filters={'_id': 0})
-
+        sender_name = callback.from_user.full_name
+        msg_txt = msg.get('text')
+        print("selected_callback:")
+        print(selected_btn)
         if selected_callback in ['reassign']:
-            print('hey')
+            print('hey under reassign')
             sender_name = callback.from_user.full_name
             t_selected = args[2]
             msg_txt = msg.get('text')
@@ -52,14 +58,17 @@ def handle_callbacks(callback):
             t = '{txt} \n Reassigned: {p}(by {u})'.format(txt=msg_txt, p=p_lst[0]['name'] if p_lst else 'No Name', u=sender_name)
             _key = Utils.create_inlinekeyboard(buttons=Const.mainInKeyBoard, cols=2)
             #if chat_id<0 or chat_id>0:
+            print("starting a task ;") 
             if callback.message.photo:
                 res = bot.editMessageCaption(chat_id=chat_id, caption=t, message_id = message_id, parse_mode='Markdown', reply_markup=_key)
             else:
                 res = bot.editMessageText(chat_id=chat_id, text=t, message_id = message_id, parse_mode='Markdown', reply_markup=_key)
+            #bot.delete_message(chat_id=chat_id, text=t) 
+                  
             MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t}}) 
+        
         elif selected_callback in ['department']:
             sender_name = callback.from_user.full_name
-            #t = 'Task: {task}\nIssuer: {sender} \n'.format(task=msg.get('task', ''), #sender=sender_name)
             _keyRA=[]
             peopleKey = []
             for people in peopleList:
@@ -70,21 +79,28 @@ def handle_callbacks(callback):
                 bot.editMessageCaption(chat_id=chat_id, caption=msg.get('text'), message_id = message_id, parse_mode='Markdown', reply_markup=_key2) 
             else:
                 bot.editMessageText(chat_id=chat_id, text=msg.get('text'), message_id = message_id,parse_mode='Markdown', reply_markup=_key2) 
+        
         elif selected_callback in ['people']:
             msg_txt = msg.get('text')
+            print('pppppppppp')
+            print(args)
             p_lst = [x for x in peopleList if x.get('tid') == int(args[2])]
             sender_name = callback.from_user.full_name
             t = '{txt} \nAssigned to: {person}(by {issuer})'.format(txt=msg_txt, person=p_lst[0]['name'] if p_lst else 'No Name', issuer=sender_name)
             people_tid = int(args[2])
-            _keyRA = []
-            for k2 in Const.approvalInKeyBoard:    
-                _keyRA.append({
-                    'text': k2.get('text'),
-                    'callback_data': k2.get('callback_data').format(dep=' office ', tid=people_tid)
-                })
-                _key2 = Utils.create_inlinekeyboard(buttons=_keyRA, cols=2)  
+
+            #task level inline keyboard 
+            _keyTL=[]
+            klevels = Const.task_levelInKeyBoard
+            for level in klevels:
+                _keyTL.append({
+                    'text': level.get('text'),
+                    'callback_data': level.get('callback_data').format(dep=args[1], tid=people_tid)
+                })    
+            _key3 = Utils.create_inlinekeyboard(buttons=_keyTL, cols=2)            
+            print ('this is the: ', level)
             if callback.message.photo:
-                res2 = bot.send_photo(chat_id=people_tid, caption=t, photo=callback.message.photo[-1].file_id, parse_mode='Markdown', reply_markup=_key2)
+                res2 = bot.send_photo(chat_id=people_tid, caption=t, photo=callback.message.photo[-1].file_id, parse_mode='Markdown', reply_markup=_key3)
                 MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t}}) 
                 MessageModel.save_one({
                                         'message_id': res2.message_id,
@@ -96,7 +112,7 @@ def handle_callbacks(callback):
                                         'id': msg.get('id')
                                     })
             else:
-                res2 = bot.sendMessage(chat_id=people_tid, text=t, parse_mode='Markdown', reply_markup=_key2) 
+                res2 = bot.sendMessage(chat_id=people_tid, text=t, parse_mode='Markdown', reply_markup=_key3) 
                 MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t}}) 
                 MessageModel.save_one({
                                         'message_id': res2.message_id,
@@ -107,24 +123,84 @@ def handle_callbacks(callback):
                                         'photo': '',
                                         'id': msg.get('id')
                                     })
+            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            print (" I printed levels")
             
-            #bot.delete_message(chat_id=chat_id, message_id=message_id)
+        elif selected_callback in ['asap']:
+            print ("I'm in levels")
+            print (selected_callback)
+            print(args)
+            msg_txt = msg.get('text')
+            #p_lst = [x for x in peopleList if x.get('tid') == int(args[2])]
+            p_lst = [x for x in peopleList if x.get('tid') == int(args[2]) ]
+            print(p_lst)
+            print("p_lst")
+            sender_name = callback.from_user.full_name
+            pn = p_lst[0]['name'] if p_lst else 'No Name'
+            t = '{txt} \nAssigned to: {person}(by {issuer}) \nLevel: {level}'.format(txt=msg_txt, person=pn, issuer=sender_name, level='asap')           
+            people_tid = int(args[2])
+            _keyRA = []
+            for k2 in Const.approvalInKeyBoard:    
+                _keyRA.append({
+                    'text': k2.get('text'),
+                    'callback_data': k2.get('callback_data').format(dep=args[1], tid=people_tid)
+                })
+                _key2 = Utils.create_inlinekeyboard(buttons=_keyRA, cols=2)  
+            if callback.message.photo:
+                res2 = bot.send_photo(chat_id=people_tid, caption=t, photo=callback.message.photo[-1].file_id, parse_mode='Markdown', reply_markup=_key2)
+                MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t, 'chatid': people_tid,'message_id': res2.message_id}}) 
+            else:
+                res2 = bot.sendMessage(chat_id=people_tid, text=t, parse_mode='Markdown', reply_markup=_key2) 
+                MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t, 'chatid': people_tid,'message_id': res2.message_id}}) 
+            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            
+        elif selected_callback in ['urgent']:
+            print ("I'm in urgent")
+            print(args)
+            msg_txt = msg.get('text')
+            p_lst = [x for x in peopleList if x.get('tid') == int(args[2]) ]
+            sender_name = callback.from_user.full_name
+            pn = p_lst[0]['name'] if p_lst else 'No Name'
+            t = '{txt} \nAssigned to: {person}(by {issuer}) \nLevel: {level}'.format(txt=msg_txt, person=pn, issuer=sender_name, level='urgent')           
+            people_tid = int(args[2])
+            _keyRA = []
+            for k2 in Const.approvalInKeyBoard:    
+                _keyRA.append({
+                    'text': k2.get('text'),
+                    'callback_data': k2.get('callback_data').format(dep=args[1], tid=people_tid)
+                })
+                _key2 = Utils.create_inlinekeyboard(buttons=_keyRA, cols=2)  
+            if callback.message.photo:
+                res2 = bot.send_photo(chat_id=people_tid, caption=t, photo=callback.message.photo[-1].file_id, parse_mode='Markdown', reply_markup=_key2)
+                MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t, 'chatid': people_tid,'message_id': res2.message_id}}) 
+                #TaskModel.update_message(args={'id': msg.get('id')}, set_query={'$set':{'level': #'urgent', 'message_id': res2.message_id}}) 
+            else:
+                res2 = bot.sendMessage(chat_id=people_tid, text=t, parse_mode='Markdown', reply_markup=_key2) 
+                MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t, 'chatid': people_tid,'message_id': res2.message_id}}) 
+            bot.delete_message(chat_id=chat_id, message_id=message_id)
 
         elif selected_callback in ['done']:
-            msg_txt = msg.get('text')
-            t = '{txt} \n\n Done!'.format(txt=msg_txt)
+            t = '{txt} \n\n Done! ✅ \n by {u}'.format(txt=msg_txt, u=sender_name)
             if callback.message.photo:
                 res = bot.editMessageCaption(chat_id=chat_id, caption=t, message_id = message_id)
             else:
                 res = bot.editMessageText(chat_id=chat_id, text=t, message_id = message_id)
             MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t}}) 
+            #bot.sendMessage(chat_id=update.message.from_user.full_name, text=t) 
+
         elif selected_callback in ['reject']:
-            msg_txt = msg.get('text')
-            t = '{txt} \n\n Rejected!'.format(txt=msg_txt)
+            t = '{txt} \n\n Rejected! ❌ \n by {u}'.format(txt=msg_txt, u=sender_name)
             if callback.message.photo:
-                res = bot.editMessageCaption(chat_id=chat_id, caption=t, message_id = message_id)
+                try:
+                    res = bot.editMessageCaption(chat_id=chat_id, caption=t, message_id = message_id)
+                except Exception as err:
+                    print('[Error in edit caption reject msg]: '+ str(err))
             else:
-                res = bot.editMessageText(chat_id=chat_id, text=t, message_id = message_id)
+                try:
+                    res = bot.editMessageText(chat_id=chat_id, text=t, message_id = message_id)
+                except Exception as err2:
+                    print('[Error in edit text reject msg]: '+ str(err2))
             MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t}}) 
+            #bot.sendMessage(chat_id=chat_id, text=t) 
         else:
-            pass
+            pass       

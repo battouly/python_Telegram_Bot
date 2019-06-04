@@ -32,6 +32,17 @@ class TaskModel:
         return False
 
     @staticmethod
+    def update_task(args, set_query):
+        try:
+            res = task.update_one(args, set_query, upsert=False)
+            if res.acknowledged:
+                return True
+            return False
+        except Exception as e:
+            print ('[Task Model Error] Update task: ' + str(e))
+        return False
+
+    @staticmethod
     def get_one(args, filters):
         try:
             message = task.find_one(args, filters)
