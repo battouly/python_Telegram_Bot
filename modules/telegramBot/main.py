@@ -94,7 +94,7 @@ def webhook_handler():
                                         'timestamp': int(timestamp),
                                         'task': task_txt,
                                         'issuer_id': chat_id,
-                                        'issue': update.message.from_user.full_name,
+                                        'issuer': update.message.from_user.full_name,
                                         'level': '',
                                         'status': 'initiate',
                                         'message_id': res.message_id,
@@ -116,14 +116,15 @@ def webhook_handler():
                                 else:
                                     bot.sendMessage(chat_id=chat_id, text='blah blah')                                  
                     elif update.message.photo:
-                        pid = update.message.photo[-1].file_id
+                        pass
+                        #pid = update.message.photo[-1].file_id
                         #check if the photo has caption
-                        if update.message.caption:
-                            text = update.message.caption + " \n        💙 🌹 💙"
-                            bot.send_photo(chat_id=chat_id,caption=text , photo=pid) 
+                        #if update.message.caption:
+                            #text = update.message.caption + " \n        💙 🌹 💙"
+                            #bot.send_photo(chat_id=chat_id,caption=text , photo=pid) 
                         #if the photo has no caption send a simple message      
-                        else:
-                            bot.send_photo(chat_id=chat_id,caption="This is a nice photo!" , photo=pid)
+                        #else:
+                            #bot.send_photo(chat_id=chat_id,caption="This is a nice photo!" , photo=pid)
 
                     else: #update.message.text:
                         pass
