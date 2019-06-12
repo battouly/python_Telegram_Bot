@@ -7,15 +7,15 @@ from models.task import TaskModel
 peopleList = [
     {
         "name": "Nasrin",
-        "tid": 499850947
+        "tid": 499******
     },
     {
         "name": "Fatima",
-        "tid": 462737129
+        "tid": 462******
     },
     {
         "name": "KbotMasteresses",
-        "tid": -1001484208668
+        "tid": -1001484******
     }  
 ]
 def handle_callbacks(callback):
