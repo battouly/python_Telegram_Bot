@@ -11,8 +11,13 @@ from modules.message.utils import Utils
 from modules.message.handler import handle_callbacks
 from modules.Consts.main import Const
 from models.message import MessageModel
+from models.task import TaskModel
 from modules.task.main import Task
 #from telegram import ReplyKeyboardMarkup
+
+import pprint
+Print = pprint.PrettyPrinter(indent=4).pprint
+
 
 main = Blueprint('main', __name__)
 
@@ -23,14 +28,16 @@ def generate_id():
 def webhook_handler():
     #print('im hereeee')
     timestamp = int(time.time())
-    _date = datetime.datetime.now().strftime('%d %B')
+    _date = datetime.datetime.now().strftime('%d %B %Y')
     try:
         if request.method == "POST":
             # retrieve the message in JSON and transform it to Telegram object
             update = telegram.Update.de_json(request.get_json(force=True),bot)
+            print (update)
             if bool(update):
                 if update.message:
                     chat_id = update.message.chat.id 
+                    s_id=update.message.from_user.id
                     message_id = update.message.message_id
                     #commands for displaying inlinekeyboard
                     print (chat_id,'_hello')
@@ -43,6 +50,7 @@ def webhook_handler():
                                 cmnd = update.message.text[c_offset+1: c_offset+ c_length]
                                 task_txt = update.message.text[c_offset+ c_length:]
                                 txt = 'Issuer: {}({})\nTitle: {}'.format(update.message.from_user.full_name, _date, task_txt)
+                                msg = MessageModel.get_one(args={'message_id': message_id}, filters={'_id': 0})
                                 if cmnd == 'task':
                                     _key = Utils.create_inlinekeyboard(buttons=Const.mainInKeyBoard, cols=2)
                                     res = bot.sendMessage(chat_id=chat_id, message_id=message_id,text=txt or ' Do nothing ' , parse_mode='Markdown', reply_markup=_key)
@@ -50,6 +58,7 @@ def webhook_handler():
                                     
                                     Task.save_task({
                                         'timestamp': int(timestamp),
+                                        'date': _date,
                                         'task': task_txt,
                                         'issuer_id': chat_id,
                                         'issue': update.message.from_user.full_name,
@@ -59,9 +68,11 @@ def webhook_handler():
                                         'id':_id,
                                         'department': '',
                                         'assignee': '',
+                                        'comment': [],
                                         'photo': False
                                     })
                                     MessageModel.save_one({
+                                        'issuer_id': chat_id,
                                         'message_id': res.message_id,
                                         'text': txt,
                                         'task': task_txt,
@@ -71,9 +82,28 @@ def webhook_handler():
                                         'id':_id
                                     })
                                     bot.delete_message(chat_id=chat_id, message_id=message_id,text=txt)
-                                else:
-                                    bot.sendMessage(chat_id=chat_id, text='blah blah')  
-                                    bot.delete_message(chat_id=chat_id, message_id=message_id,text=txt)             
+                                elif cmnd == 'mytasks':
+                                    print ('I am in mytasks!')
+                                    
+                                    check = TaskModel.get_all(args={'issuer_id': s_id}, filters={'_id':0})
+                                    print (check)
+                                    if check:
+                                        for c in check:
+                                            c_task = c.get('task')
+                                            c_date = c.get('date')
+                                            c_status = c.get('status')
+                                            c_level = c.get('level')
+                                            c_photo = c.get('photo')
+                                            ct = u'Task: {task}\nDate: {date}\nLevel: {level}\nStatus: {status}'.format(task=c_task, date=c_date, level=c_level, status=c_status)
+                                            if not bool(c_photo):
+                                                bot.sendMessage(chat_id=chat_id, text=ct or ' You did not issue any task yet!')
+                                            else:
+                                                bot.send_photo(chat_id=chat_id,caption=ct or ' You did not issue any task yet!', photo=c_photo)
+                                    else:
+                                        bot.sendMessage(chat_id=chat_id, text='You did not issue any task yet!')  
+
+
+
                     elif update.message.caption_entities:
                         for entity in update.message.caption_entities:
                             photo = update.message.photo[-1].file_id
@@ -92,6 +122,7 @@ def webhook_handler():
                                     photo=photo, parse_mode='Markdown', reply_markup=_key) 
                                     Task.save_task({
                                         'timestamp': int(timestamp),
+                                        'date': _date,
                                         'task': task_txt,
                                         'issuer_id': chat_id,
                                         'issuer': update.message.from_user.full_name,

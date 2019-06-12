@@ -25,20 +25,14 @@ def handle_callbacks(callback):
     else:
         txt = callback.message.text
     print(callback.message.message_id)
-    #chat_id = callback.from_user.id
     chat_id = callback.message.chat.id
-    print('printing user_id')
     print (callback.message.chat.id)
     message_id = callback.message.message_id
-    print(message_id)
-    
     selected_btn = callback.data
     selected_btn = str(selected_btn).strip()
     
     args = str(selected_btn).strip().split('_')
-    print(args, 'this is args')
     selected_callback = args[0]
-    
     msg = MessageModel.get_one(args={'message_id': message_id}, filters={'_id': 0})
     if msg:
         print('I found a message')
@@ -82,8 +76,6 @@ def handle_callbacks(callback):
         
         elif selected_callback in ['people']:
             msg_txt = msg.get('text')
-            print('pppppppppp')
-            print(args)
             p_lst = [x for x in peopleList if x.get('tid') == int(args[2])]
             sender_name = callback.from_user.full_name
             t = '{txt} \nAssigned to: {person}(by {sender})'.format(txt=msg_txt, person=p_lst[0]['name'] if p_lst else 'No Name', sender=sender_name)
@@ -134,7 +126,8 @@ def handle_callbacks(callback):
             p_lst = [x for x in peopleList if x.get('tid') == int(args[2]) ]
             sender_name = callback.from_user.full_name
             pn = p_lst[0]['name'] if p_lst else 'No Name'
-            t = '{txt} \nAssigned to: {person}(by {sender}) \nLevel: {level}'.format(txt=msg_txt, person=pn, sender=sender_name, level='asap')           
+            print (msg_txt)
+            t = '{txt} \nLevel: {level}'.format(txt=msg_txt,level='asap')           
             people_tid = int(args[2])
             _keyRA = []
             for k2 in Const.approvalInKeyBoard:    
@@ -145,7 +138,7 @@ def handle_callbacks(callback):
                 _key2 = Utils.create_inlinekeyboard(buttons=_keyRA, cols=2)  
             if callback.message.photo:
                 res2 = bot.send_photo(chat_id=people_tid, caption=t, photo=callback.message.photo[-1].file_id, parse_mode='Markdown', reply_markup=_key2)
-                MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t, 'chatid': people_tid,'message_id': res2.message_id}}) 
+                MessageModel.update_message(args={'message_id': message_id,'id': msg.get('id')}, set_query={'$set':{'text': t, 'chatid': people_tid,'message_id': res2.message_id}})
                 TaskModel.update_task(args={'id': msg.get('id')}, set_query={'$set':{'level': 'asap', 'message_id': res2.message_id}})               
             else:
                 res2 = bot.sendMessage(chat_id=people_tid, text=t, parse_mode='Markdown', reply_markup=_key2) 
@@ -160,7 +153,7 @@ def handle_callbacks(callback):
             p_lst = [x for x in peopleList if x.get('tid') == int(args[2]) ]
             sender_name = callback.from_user.full_name
             pn = p_lst[0]['name'] if p_lst else 'No Name'
-            t = '{txt} \nAssigned to: {person}(by {issuer}) \nLevel: {level}'.format(txt=msg_txt, person=pn, issuer=sender_name, level='urgent')           
+            t = '{txt} \nLevel: {level}'.format(txt=msg_txt,level='asap')           
             people_tid = int(args[2])
             _keyRA = []
             for k2 in Const.approvalInKeyBoard:    

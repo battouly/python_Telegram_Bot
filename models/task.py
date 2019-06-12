@@ -43,6 +43,19 @@ class TaskModel:
         return False
 
     @staticmethod
+    def update_comment(args, set_query):
+        try:
+            res = task.update_one(args, set_query, upsert=False)
+            #args=chat_id
+            #set_query=message_id
+            if res.acknowledged:
+                return True
+            return False
+        except Exception as e:
+            print ('[Task Model Error] Update task: ' + str(e))
+        return False        
+
+    @staticmethod
     def get_one(args, filters):
         try:
             message = task.find_one(args, filters)
